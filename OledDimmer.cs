@@ -1,4 +1,4 @@
-// OledDimmer.cs — C# 5 uyumlu, ayarlar kaydedilir
+// OledDimmer.cs — C# 5 compatible
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -113,7 +113,6 @@ namespace OledDimmer
         protected override void Dispose(bool d) { if (d && _timer != null) _timer.Dispose(); base.Dispose(d); }
     }
 
-    // Mouse gorev cubugunda mi? 200ms'de bir sorar.
     class TaskbarMouseWatcher : IDisposable
     {
         [DllImport("user32.dll")] static extern bool   GetWindowRect(IntPtr h, out RECT r);
@@ -172,8 +171,8 @@ namespace OledDimmer
         public SettingsForm(byte currentAlpha, bool active, bool mouseWatch)
         {
             _active = active;
-            this.Text            = "OLED Dimmer - Ayarlar";
-            this.Size            = new Size(430, 350);
+            this.Text            = "OLED Taskbar Dimmer";
+            this.Size            = new Size(430, 320);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox     = false;
             this.StartPosition   = FormStartPosition.CenterScreen;
@@ -186,93 +185,86 @@ namespace OledDimmer
         void BuildUI(byte cur, bool mouseWatch)
         {
             Label lblTitle = new Label();
-            lblTitle.Text = "OLED Gorev Cubugu Karartici";
-            lblTitle.Font = new Font("Segoe UI", 13, FontStyle.Bold);
+            lblTitle.Text      = "OLED Taskbar Dimmer";
+            lblTitle.Font      = new Font("Segoe UI", 13, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
-            lblTitle.Location = new Point(20, 16);
-            lblTitle.AutoSize = true;
-
-            Label lblDesc = new Label();
-            lblDesc.Text = "Gorev cubuguna bagli overlay — tiklama sorunu yok.";
-            lblDesc.Font = new Font("Segoe UI", 9);
-            lblDesc.ForeColor = Color.FromArgb(140, 140, 140);
-            lblDesc.Location = new Point(22, 48);
-            lblDesc.Size = new Size(384, 20);
+            lblTitle.Location  = new Point(20, 20);
+            lblTitle.AutoSize  = true;
 
             Label lblSlider = new Label();
-            lblSlider.Text = "Karartma Seviyesi";
-            lblSlider.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            lblSlider.Text      = "Dimming Level";
+            lblSlider.Font      = new Font("Segoe UI", 9, FontStyle.Bold);
             lblSlider.ForeColor = Color.FromArgb(255, 100, 30);
-            lblSlider.Location = new Point(22, 84);
-            lblSlider.AutoSize = true;
+            lblSlider.Location  = new Point(22, 64);
+            lblSlider.AutoSize  = true;
 
             _lblPct = new Label();
-            _lblPct.Text = ((int)(cur / 2.55)).ToString() + "%";
-            _lblPct.Font = new Font("Segoe UI", 11, FontStyle.Bold);
+            _lblPct.Text      = ((int)(cur / 2.55)).ToString() + "%";
+            _lblPct.Font      = new Font("Segoe UI", 11, FontStyle.Bold);
             _lblPct.ForeColor = Color.White;
-            _lblPct.Location = new Point(350, 80);
-            _lblPct.Size = new Size(54, 24);
+            _lblPct.Location  = new Point(350, 60);
+            _lblPct.Size      = new Size(54, 24);
             _lblPct.TextAlign = ContentAlignment.MiddleRight;
 
             _slider = new TrackBar();
             _slider.Minimum = 10; _slider.Maximum = 245; _slider.Value = cur;
             _slider.TickFrequency = 20;
-            _slider.Location = new Point(18, 104);
-            _slider.Size = new Size(390, 40);
+            _slider.Location  = new Point(18, 84);
+            _slider.Size      = new Size(390, 40);
             _slider.BackColor = Color.FromArgb(18, 18, 18);
             _slider.ValueChanged += new EventHandler(OnSlider);
 
             Panel sep1 = new Panel();
-            sep1.Location = new Point(20, 150); sep1.Size = new Size(384, 1);
+            sep1.Location  = new Point(20, 130); sep1.Size = new Size(384, 1);
             sep1.BackColor = Color.FromArgb(50, 50, 50);
 
             _btnToggle = new Button();
-            _btnToggle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            _btnToggle.Font      = new Font("Segoe UI", 10, FontStyle.Bold);
             _btnToggle.FlatStyle = FlatStyle.Flat;
-            _btnToggle.Location = new Point(20, 162);
-            _btnToggle.Size = new Size(190, 44);
-            _btnToggle.Click += new EventHandler(OnToggle);
+            _btnToggle.Location  = new Point(20, 142);
+            _btnToggle.Size      = new Size(190, 44);
+            _btnToggle.Click    += new EventHandler(OnToggle);
             RefreshToggle();
 
             Button btnQuit = new Button();
-            btnQuit.Text = "Programi Kapat";
-            btnQuit.Font = new Font("Segoe UI", 10);
+            btnQuit.Text      = "Quit";
+            btnQuit.Font      = new Font("Segoe UI", 10);
             btnQuit.BackColor = Color.FromArgb(30, 30, 30);
             btnQuit.ForeColor = Color.FromArgb(180, 80, 80);
             btnQuit.FlatStyle = FlatStyle.Flat;
-            btnQuit.Location = new Point(220, 162);
-            btnQuit.Size = new Size(190, 44);
+            btnQuit.Location  = new Point(220, 142);
+            btnQuit.Size      = new Size(190, 44);
             btnQuit.FlatAppearance.BorderColor = Color.FromArgb(100, 40, 40);
             btnQuit.Click += new EventHandler(OnQuit);
 
             Panel sep2 = new Panel();
-            sep2.Location = new Point(20, 216); sep2.Size = new Size(384, 1);
+            sep2.Location  = new Point(20, 196); sep2.Size = new Size(384, 1);
             sep2.BackColor = Color.FromArgb(50, 50, 50);
 
             _chkMouseWatch = new CheckBox();
-            _chkMouseWatch.Text = "Mouse gelince karartmayi kaldir";
-            _chkMouseWatch.Font = new Font("Segoe UI", 10);
+            _chkMouseWatch.Text      = "Hide overlay when mouse is on taskbar";
+            _chkMouseWatch.Font      = new Font("Segoe UI", 10);
             _chkMouseWatch.ForeColor = Color.FromArgb(180, 180, 180);
-            _chkMouseWatch.Location = new Point(22, 228);
-            _chkMouseWatch.AutoSize = true;
-            _chkMouseWatch.Checked = mouseWatch;
+            _chkMouseWatch.Location  = new Point(22, 208);
+            _chkMouseWatch.AutoSize  = true;
+            _chkMouseWatch.Checked   = mouseWatch;
             _chkMouseWatch.CheckedChanged += new EventHandler(OnMouseWatchChanged);
 
             Panel sep3 = new Panel();
-            sep3.Location = new Point(20, 262); sep3.Size = new Size(384, 1);
+            sep3.Location  = new Point(20, 242); sep3.Size = new Size(384, 1);
             sep3.BackColor = Color.FromArgb(50, 50, 50);
 
             _chkAutoStart = new CheckBox();
-            _chkAutoStart.Text = "Windows baslarken otomatik ac";
-            _chkAutoStart.Font = new Font("Segoe UI", 10);
+            _chkAutoStart.Text      = "Launch at Windows startup";
+            _chkAutoStart.Font      = new Font("Segoe UI", 10);
             _chkAutoStart.ForeColor = Color.FromArgb(180, 180, 180);
-            _chkAutoStart.Location = new Point(22, 274);
-            _chkAutoStart.AutoSize = true;
-            _chkAutoStart.Checked = IsAutoStartEnabled();
+            _chkAutoStart.Location  = new Point(22, 254);
+            _chkAutoStart.AutoSize  = true;
+            _chkAutoStart.Checked   = IsAutoStartEnabled();
             _chkAutoStart.CheckedChanged += new EventHandler(OnAutoStartChanged);
 
             this.Controls.AddRange(new Control[]
-                { lblTitle, lblDesc, lblSlider, _lblPct, _slider,
+                { lblTitle, lblSlider, _lblPct, _slider,
                   sep1, _btnToggle, btnQuit,
                   sep2, _chkMouseWatch,
                   sep3, _chkAutoStart });
@@ -292,7 +284,7 @@ namespace OledDimmer
         void EnableAutoStart()
         {
             try { RegistryKey k = Registry.CurrentUser.OpenSubKey(RUN_KEY, true); k.SetValue(APP_NAME, "\"" + Application.ExecutablePath + "\""); }
-            catch { MessageBox.Show("Otomatik baslama eklenemedi.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning); _chkAutoStart.Checked = false; }
+            catch { MessageBox.Show("Could not enable startup.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning); _chkAutoStart.Checked = false; }
         }
         void DisableAutoStart()
         {
@@ -302,8 +294,8 @@ namespace OledDimmer
 
         void RefreshToggle()
         {
-            if (_active) { _btnToggle.Text = "Karartmayi Kapat"; _btnToggle.BackColor = Color.FromArgb(50, 20, 10); _btnToggle.ForeColor = Color.FromArgb(255, 110, 30); _btnToggle.FlatAppearance.BorderColor = Color.FromArgb(255, 110, 30); }
-            else         { _btnToggle.Text = "Karartmayi Ac";    _btnToggle.BackColor = Color.FromArgb(15, 45, 15); _btnToggle.ForeColor = Color.FromArgb(80, 220, 100);  _btnToggle.FlatAppearance.BorderColor = Color.FromArgb(80, 220, 100); }
+            if (_active) { _btnToggle.Text = "Disable Dimming"; _btnToggle.BackColor = Color.FromArgb(50, 20, 10); _btnToggle.ForeColor = Color.FromArgb(255, 110, 30); _btnToggle.FlatAppearance.BorderColor = Color.FromArgb(255, 110, 30); }
+            else         { _btnToggle.Text = "Enable Dimming";  _btnToggle.BackColor = Color.FromArgb(15, 45, 15); _btnToggle.ForeColor = Color.FromArgb(80, 220, 100);  _btnToggle.FlatAppearance.BorderColor = Color.FromArgb(80, 220, 100); }
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -326,7 +318,6 @@ namespace OledDimmer
 
         const string SAVE_KEY = "SOFTWARE\\OledDimmer";
 
-        // Ayarlari kaydet
         void Save()
         {
             try
@@ -339,7 +330,6 @@ namespace OledDimmer
             catch { }
         }
 
-        // Ayarlari yukle
         void Load()
         {
             try
@@ -390,14 +380,14 @@ namespace OledDimmer
             menu.ForeColor = Color.White;
             menu.Renderer  = new DarkRenderer();
 
-            ToolStripMenuItem mToggle = new ToolStripMenuItem(_active ? "Karartmayi Kapat" : "Karartmayi Ac");
+            ToolStripMenuItem mToggle = new ToolStripMenuItem(_active ? "Disable Dimming" : "Enable Dimming");
             mToggle.ForeColor = Color.FromArgb(255, 120, 40);
             mToggle.Click += new EventHandler(OnTrayToggle);
 
-            ToolStripMenuItem mSettings = new ToolStripMenuItem("Ayarlar...");
+            ToolStripMenuItem mSettings = new ToolStripMenuItem("Settings...");
             mSettings.Click += new EventHandler(OnTraySettings);
 
-            ToolStripMenuItem mQuit = new ToolStripMenuItem("Programi Kapat");
+            ToolStripMenuItem mQuit = new ToolStripMenuItem("Quit");
             mQuit.ForeColor = Color.FromArgb(200, 80, 80);
             mQuit.Click += new EventHandler(OnTrayQuit);
 
@@ -409,7 +399,7 @@ namespace OledDimmer
 
             _tray = new NotifyIcon();
             _tray.Icon             = Icon.FromHandle(bmp.GetHicon());
-            _tray.Text             = _active ? "OLED Dimmer - Aktif" : "OLED Dimmer - Pasif";
+            _tray.Text             = _active ? "OLED Dimmer - Active" : "OLED Dimmer - Inactive";
             _tray.Visible          = true;
             _tray.ContextMenuStrip = menu;
             _tray.DoubleClick     += new EventHandler(OnTraySettings);
@@ -420,8 +410,8 @@ namespace OledDimmer
             _active = !_active;
             _overlay.UserActive = _active && !_mouseOnBar;
             ToolStripMenuItem mi = _tray.ContextMenuStrip.Items[0] as ToolStripMenuItem;
-            if (_active) { if (mi != null) mi.Text = "Karartmayi Kapat"; _tray.Text = "OLED Dimmer - Aktif"; }
-            else         { if (mi != null) mi.Text = "Karartmayi Ac";    _tray.Text = "OLED Dimmer - Pasif"; }
+            if (_active) { if (mi != null) mi.Text = "Disable Dimming"; _tray.Text = "OLED Dimmer - Active"; }
+            else         { if (mi != null) mi.Text = "Enable Dimming";  _tray.Text = "OLED Dimmer - Inactive"; }
             Save();
         }
 
@@ -449,8 +439,8 @@ namespace OledDimmer
             _active = on;
             _overlay.UserActive = on && !_mouseOnBar;
             ToolStripMenuItem mi = _tray.ContextMenuStrip.Items[0] as ToolStripMenuItem;
-            if (_active) { if (mi != null) mi.Text = "Karartmayi Kapat"; _tray.Text = "OLED Dimmer - Aktif"; }
-            else         { if (mi != null) mi.Text = "Karartmayi Ac";    _tray.Text = "OLED Dimmer - Pasif"; }
+            if (_active) { if (mi != null) mi.Text = "Disable Dimming"; _tray.Text = "OLED Dimmer - Active"; }
+            else         { if (mi != null) mi.Text = "Enable Dimming";  _tray.Text = "OLED Dimmer - Inactive"; }
             Save();
         }
 
